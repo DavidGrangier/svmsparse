@@ -30,10 +30,10 @@ Then trainer a model for a few epoch with
 ```lua
 local nepoch = 1
 local lambda = 1e-5
-local trainer = svmsparse.Trainer(dataset:dim(), lambda)
+local trainer = svmsparse.Trainer(trainset:dim(), lambda)
 for i = 1, nepoch do
-  trainer:epoch(dataset)
-  local eval = trainer:evaluate(dataset)
+  trainer:epoch(trainset)
+  local eval = trainer:evaluate(trainset)
   print(string.format('loss = %.3f cost = %.3f err = %.3f', eval.loss, eval.cost, eval.err))
 end
 ```
