@@ -1,7 +1,6 @@
 // -*- C++ -*-
 // SVM with stochastic gradient
 // Copyright (C) 2016- David Grangier
-// Copyright (C) 2007- Leon Bottou
 
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public

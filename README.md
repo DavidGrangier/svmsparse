@@ -1,6 +1,6 @@
 # SVM Sparse for Torch #
 
-This is a wrapper to Leon Bottou's fast log-loss sparse linear SVM (logistic regression).
+This is a Torch interface to Leon Bottou's fast log-loss sparse linear SVM (logistic regression).
 Currently only the plain sgd version (no average SGD) is interfaced.
 
 Please see [Leon Bottou's page](http://leon.bottou.org/projects/sgd) for the original project.
