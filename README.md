@@ -18,6 +18,8 @@ where indices: IntTensor, values: FloatTensor, labels -1.0 or 1.0
 require 'torch'
 local svmsparse = require 'svmsparse'
 
+-- create indices[i], values[i], labels[i]...
+
 local trainset = svmsparse.Dataset()
 for i = 1, n do
   trainset:add(indices[i], values[i], labels[i])
@@ -39,6 +41,7 @@ end
 Finally, you can read the trained weights + bias as a FloatTensor,
 ```lua
 local w = trainer:weights()
+-- do what you want with the weights...
 ```
 
 See example.lua for a running toy example.
