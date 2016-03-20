@@ -5,6 +5,10 @@ Currently only the plain sgd version (no average SGD) is interfaced.
 
 Please see [Leon Bottou's page](http://leon.bottou.org/projects/sgd) for the original project.
 
+## Requirement ##
+
+Torch7 (http://github.com/torch/torch7)
+
 ## Installation ##
 
 luarocks install https://raw.githubusercontent.com/DavidGrangier/sparsesvm/master/rocks/svmsparse-scm-1.rockspec
