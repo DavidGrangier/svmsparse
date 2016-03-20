@@ -2,14 +2,14 @@ package = "svmsparse"
 version = "scm-1"
 
 source = {
-   url = "git://..."
+   url = "git://github.com/DavidGrangier/sparsesvm.git"
 }
 
 description = {
    summary = "Fast Sparse Linear SVM",
    detailed = [[Torch interface to Leon Bottou's fast svm sgd package
    ]],
-   homepage = "https://...",
+   homepage = "https://github.com/DavidGrangier/sparsesvm/",
    license = "LGPL-2.1"
 }
 

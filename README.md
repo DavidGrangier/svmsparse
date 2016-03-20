@@ -7,7 +7,7 @@ Please see [Leon Bottou's page](http://leon.bottou.org/projects/sgd) for the ori
 
 ## Installation ##
 
-torch-rocks install _URL_.rockspec
+luarocks install https://raw.githubusercontent.com/DavidGrangier/sparsesvm/master/rocks/svmsparse-scm-1.rockspec
 
 ## Usage ##
 
