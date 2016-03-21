@@ -21,7 +21,7 @@
 
 using namespace std;
 
-// cpp dataset
+/// dataset
 class Dataset {
   private:
    int pcount;
@@ -65,7 +65,7 @@ Dataset::getDim()
 }
 
 
-// exposed c interface
+/// exposed c interface
 extern "C" {
 
 Dataset*
@@ -80,7 +80,7 @@ dataset_add(Dataset* d, int n, int* indices, float* values, double label)
   SVector x;
   x.clear();
   for (int i = 0; i < n; i++) {
-    x.set(*indices++, *values++);
+    x.set(*indices++ - 1, *values++);
   }
   x.trim();
   d->add(x, label);
@@ -100,7 +100,7 @@ dataset_free(Dataset* d)
 
 }
 
-// trainer
+/// trainer
 class Trainer {
   public:
     Trainer(int dim, double lambda);

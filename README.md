@@ -16,13 +16,14 @@ luarocks install https://raw.githubusercontent.com/DavidGrangier/sparsesvm/maste
 ## Usage ##
 
 Create a training set from sparse vectors, triplets of (indices, values, labels)
-where indices: IntTensor, values: FloatTensor, labels -1.0 or 1.0
+where indices: IntTensor, values: FloatTensor, labels -1.0 or 1.0 . In the lua tradition, the indices of sparse vectors starts at 1.
 
 ```lua
 require 'torch'
 local svmsparse = require 'svmsparse'
 
 -- create indices[i], values[i], labels[i]...
+-- data should be shuffled, L2-normalized by your program.
 
 local trainset = svmsparse.Dataset()
 for i = 1, n do

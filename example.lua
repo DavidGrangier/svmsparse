@@ -7,7 +7,7 @@ local svm = function(w, x)
   local s = w[w:size(1)]
   local idx, val = unpack(x)
   for i = 1, idx:size(1) do
-    s = w[idx[i] + 1] * val[i]
+    s = w[ idx[i] ] * val[i]
   end
   return s
 end
@@ -22,7 +22,7 @@ for _, x in ipairs(data) do
   local indices, value, label = unpack(x)
   dataset:add(indices, value, label) 
 end
-assert(dataset:dim() == 10)
+assert(dataset:dim() == 9)
 
 -- training
 local nepoch = 1
