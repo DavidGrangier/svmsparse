@@ -50,3 +50,14 @@ local w = trainer:weights()
 ```
 
 See example.lua for a running toy example.
+
+## One Vs All ##
+
+For one versus all multiclass setting, it is often usefull to keep the same training set and replace the labels, 
+
+```lua
+local n = trainset:size()
+for i = 1, n do
+  trainset:relabel(i, newlabels[i])
+end
+```

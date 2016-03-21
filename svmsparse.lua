@@ -24,7 +24,10 @@ ffi.cdef[[
 typedef struct Dataset_ Dataset;
 Dataset* dataset_new();
 void dataset_add(Dataset* d, int n, int* indices, float* values, double label);
+void dataset_relabel(Dataset* d, int index, double label);
 int dataset_getdim(Dataset *d);
+int dataset_getpcount(Dataset *d);
+int dataset_getncount(Dataset *d);
 void dataset_free(Dataset* d);
 
 typedef struct Trainer_ Trainer;
@@ -38,7 +41,6 @@ void trainer_free(Trainer* t);
 
 ]]
 
---local C = ffi.load('svmsparse')
 local C = ffi.load(package.searchpath('libsvmsparse', package.cpath))
 
 --- ---
@@ -57,6 +59,19 @@ function Dataset:add(indices, values, label)
   C.dataset_add(self, n, i, v, label)
 end
 
+-- relabel an example
+function Dataset:relabel(index, label)
+  C.dataset_relabel(self, index - 1, label)
+end
+
+-- query dataset # of examples, # of positives, # of negatives
+function Dataset:size()
+  local pcount = C.dataset_getpcount(self)
+  local ncount = C.dataset_getncount(self)
+  return pcount + ncount, pcount, ncount
+end
+
+-- return data dimension = largest indices
 Dataset.dim = C.dataset_getdim;
 
 ffi.metatype('Dataset', {__index = Dataset})

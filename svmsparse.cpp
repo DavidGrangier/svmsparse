@@ -33,7 +33,10 @@ class Dataset {
   public:
     Dataset();
     void add(SVector x, double y);
+    void relabel(int i, double y);
     int getDim();
+    int getPCount();
+    int getNCount();
 };
 
 Dataset::Dataset()
@@ -51,11 +54,27 @@ Dataset::add(SVector x, double y)
   xp.push_back(x);
   yp.push_back(y);
   if (y > 0)
-    pcount += 1;
+    pcount++;
   else
-    ncount += 1;
+    ncount++;
   if (x.size() > dim)
     dim = x.size();
+}
+
+void
+Dataset::relabel(int i, double y)
+{
+  if (y != +1 && y != -1)
+    assertfail("Label should be +1 or -1.");
+  if (yp[i] > 0)
+    pcount--;
+  else
+    ncount--;
+  yp[i] = y;
+  if (y > 0)
+    pcount++;
+  else
+    ncount++;
 }
 
 int
@@ -64,6 +83,17 @@ Dataset::getDim()
   return dim;
 }
 
+int
+Dataset::getPCount()
+{
+  return pcount;
+}
+
+int
+Dataset::getNCount()
+{
+  return ncount;
+}
 
 /// exposed c interface
 extern "C" {
@@ -86,10 +116,28 @@ dataset_add(Dataset* d, int n, int* indices, float* values, double label)
   d->add(x, label);
 }
 
+void
+dataset_relabel(Dataset* d, int index, double label)
+{
+  d->relabel(index, label);
+}
+
 int
 dataset_getdim(Dataset *d)
 {
   return d->getDim();
+}
+
+int
+dataset_getpcount(Dataset *d)
+{
+  return d->getPCount();
+}
+
+int
+dataset_getncount(Dataset *d)
+{
+  return d->getNCount();
 }
 
 void

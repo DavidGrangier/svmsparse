@@ -15,7 +15,7 @@ end
 -- toy data
 local data = {
  { torch.IntTensor{1,2,8}, torch.FloatTensor({1.0,1.0,1.0}), 1.0},
- { torch.IntTensor{1,4,9}, torch.FloatTensor({1.0,1.0,1.0}), -1.0}
+ { torch.IntTensor{1,4,9}, torch.FloatTensor({1.0,1.0,1.0}), 1.0}
 }
 local dataset = svmsparse.Dataset()
 for _, x in ipairs(data) do
@@ -23,6 +23,10 @@ for _, x in ipairs(data) do
   dataset:add(indices, value, label) 
 end
 assert(dataset:dim() == 9)
+
+dataset:relabel(2, -1.0)
+local size, pcount, ncount = dataset:size()
+assert(size == 2 and pcount == 1 and ncount == 1)
 
 -- training
 local nepoch = 1
