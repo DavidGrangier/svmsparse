@@ -11,7 +11,7 @@ Torch7 (http://github.com/torch/torch7)
 
 ## Installation ##
 
-luarocks install https://raw.githubusercontent.com/DavidGrangier/sparsesvm/master/rocks/svmsparse-scm-1.rockspec
+luarocks install https://raw.githubusercontent.com/DavidGrangier/svmsparse/master/rocks/svmsparse-scm-1.rockspec
 
 ## Usage ##
 
