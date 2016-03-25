@@ -34,10 +34,10 @@ clean:
 	-rm *.o 2>/dev/null
 
 vectors.o: $L/vectors.cpp ${INCS}
-	${CXX} ${CXXFLAGS} -c -o $@ $L/vectors.cpp
+	${CXX} ${CXXFLAGS} -fPIC -c -o $@ $L/vectors.cpp
 
 svmsgd.o: svmsgd.cpp svmsgd.h $P/loss.h ${INCS}
-	${CXX} ${CXXFLAGS} -c -o $@ svmsgd.cpp
+	${CXX} ${CXXFLAGS} -fPIC -c -o $@ svmsgd.cpp
 
 svmsparse.o: svmsparse.cpp $P/loss.h ${INCS}
 	${CXX} $(CXXFLAGS) -fPIC -c -o $@ svmsparse.cpp

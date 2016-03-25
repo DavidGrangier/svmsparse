@@ -16,10 +16,14 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111, USA
 
-#include "SvmSgd.h"
+#include <fstream>
+#include <iostream>
+#include "svmsgd.h"
 #include "assert.h"
 
 using namespace std;
+
+typedef std::vector<int> ivec_t;
 
 /// dataset
 class Dataset {
@@ -33,17 +37,20 @@ class Dataset {
   public:
     Dataset();
     void add(SVector x, double y);
+    void add(Dataset d, double pratio);
+    void addclass(Dataset d, double y);
     void relabel(int i, double y);
     int getDim();
     int getPCount();
     int getNCount();
+
+    void load(istream &file);
+    void save(ostream &file);
 };
 
 Dataset::Dataset()
+  : pcount(0), ncount(0), dim(-1)
 {
-  pcount = 0;
-  ncount = 0;
-  dim = -1;
 }
 
 void
@@ -59,6 +66,41 @@ Dataset::add(SVector x, double y)
     ncount++;
   if (x.size() > dim)
     dim = x.size();
+}
+
+void
+Dataset::add(Dataset d, double pratio)
+{
+  int n = d.xp.size();
+  ivec_t pos;
+  for (int i=0; i<n; i++) {
+    if (d.yp.at(i) > 0.0)
+      pos.push_back(i);
+  }
+
+  int p = pos.size();
+  int j = 0;
+  for (int i=0; i<n; i++)
+  {
+    if (d.yp.at(i) < 0.0)
+      add(d.xp.at(i), -1.0);
+    if (j < pratio * (i+j))
+    {
+      int k = pos.at(j % p);
+      add(d.xp.at(k), 1.0);
+      j++;
+    }
+  }
+}
+
+void
+Dataset::addclass(Dataset d, double y)
+{
+  int n = d.xp.size();
+  for (int i=0; i<n; i++) {
+    if (d.yp.at(i) == y)
+      add(d.xp.at(i), y);
+  }
 }
 
 void
@@ -95,6 +137,33 @@ Dataset::getNCount()
   return ncount;
 }
 
+void
+Dataset::load(istream &file)
+{
+  int nexamples;
+  file.read((char*)&nexamples, sizeof(int));
+  SVector sv;
+  double y;
+  for(int i = 0; i < nexamples; i++) {
+    sv.load(file);
+    file.read((char*)&y, sizeof(double));
+    add(sv, y);
+  }
+}
+
+void
+Dataset::save(ostream &file)
+{
+  int nexamples = pcount + ncount;
+  file.write((char*)&nexamples, sizeof(int));
+  double y;
+  for(int i = 0; i < nexamples; i++) {
+    xp.at(i).save(file);
+    y = yp.at(i);
+    file.write((char*)&y, sizeof(double));
+  }
+}
+
 /// exposed c interface
 extern "C" {
 
@@ -102,6 +171,16 @@ Dataset*
 dataset_new()
 {
   return new Dataset();
+}
+
+void
+dataset_balance(Dataset *d, Dataset* src, double pratio) {
+  d->add(*src, pratio);
+}
+
+void
+dataset_oneclass(Dataset *d, Dataset* src, double label) {
+  d->addclass(*src, label);
 }
 
 void
@@ -141,6 +220,24 @@ dataset_getncount(Dataset *d)
 }
 
 void
+dataset_save(Dataset *d, const char* filename)
+{
+  ofstream file;
+  file.open(filename);
+  d->save(file);
+  file.close();
+}
+
+void
+dataset_load(Dataset *d, const char *filename)
+{
+  ifstream file;
+  file.open(filename);
+  d->load(file);
+  file.close();
+}
+
+void
 dataset_free(Dataset* d)
 {
   delete d;
@@ -154,6 +251,7 @@ class Trainer {
     Trainer(int dim, double lambda);
     void epoch(Dataset dataset);
     void eval(Dataset dataset, double *loss, double *cost, double *nerr);
+    yvec_t predict(Dataset dataset);
     int getDim();
     void getWeights(float* weights);
   private:
@@ -197,6 +295,16 @@ Trainer::eval(Dataset d, double *loss, double *cost, double *nerr)
   *cost = *loss + 0.5 * lambda * svm.wnorm();
 }
 
+yvec_t
+Trainer::predict(Dataset d)
+{
+  yvec_t pred;
+  int n = d.xp.size();
+  for (int i = 0; i < n; i++)
+    pred.push_back( svm.testOne(d.xp.at(i), 0.0, NULL, NULL) );
+  return pred;
+}
+
 int
 Trainer::getDim()
 {
@@ -206,6 +314,7 @@ Trainer::getDim()
 void
 Trainer::getWeights(float* weights)
 {
+  svm.renorm();
   FVector w = svm.getWeights();
   for (int i = 0; i < dim; i++) {
     *weights++ = w.get(i);
@@ -233,7 +342,17 @@ trainer_evaluate(Trainer* t, Dataset* d, double *loss, double *cost, double *ner
   t->eval(*d, loss, cost, nerr);
 }
 
-int trainer_weightdim(Trainer* t)
+void
+trainer_predict(Trainer* t, Dataset* d, float *pred) {
+  yvec_t p = t->predict(*d);
+  int n = p.size();
+  for(int i=0; i<n; i++) {
+    *pred++ = (float) p.at(i);
+  }
+}
+
+int
+trainer_weightdim(Trainer* t)
 {
   return t->getDim() + 1;
 }

@@ -23,11 +23,15 @@ ffi.cdef[[
 
 typedef struct Dataset_ Dataset;
 Dataset* dataset_new();
+void dataset_balance(Dataset *d, Dataset* src, double pratio);
+void dataset_oneclass(Dataset *d, Dataset* src, double label);
 void dataset_add(Dataset* d, int n, int* indices, float* values, double label);
 void dataset_relabel(Dataset* d, int index, double label);
 int dataset_getdim(Dataset *d);
 int dataset_getpcount(Dataset *d);
 int dataset_getncount(Dataset *d);
+void dataset_save(Dataset *d, const char* filename);
+void dataset_load(Dataset *d, const char *filename);
 void dataset_free(Dataset* d);
 
 typedef struct Trainer_ Trainer;
@@ -35,6 +39,7 @@ Trainer* trainer_new(int dim, double lambda);
 void trainer_epoch(Trainer* t, Dataset* d);
 void trainer_evaluate(
   Trainer* t, Dataset* d, double *loss, double *cost, double *nerr);
+void trainer_predict(Trainer* t, Dataset* d, float *pred);
 int trainer_weightdim(Trainer* t);
 void trainer_getweights(Trainer* t, float* weights);
 void trainer_free(Trainer* t);
@@ -64,12 +69,27 @@ function Dataset:relabel(index, label)
   C.dataset_relabel(self, index - 1, label)
 end
 
+function Dataset:balance(pratio)
+  local res = Dataset.new()
+  C.dataset_balance(res, self, pratio)
+  return res
+end
+
+function Dataset:oneclass(label)
+  local res = Dataset.new()
+  C.dataset_oneclass(res, self, label)
+  return res
+end
+
 -- query dataset # of examples, # of positives, # of negatives
 function Dataset:size()
   local pcount = C.dataset_getpcount(self)
   local ncount = C.dataset_getncount(self)
   return pcount + ncount, pcount, ncount
 end
+
+Dataset.save = C.dataset_save
+Dataset.load = C.dataset_load
 
 -- return data dimension = largest indices
 Dataset.dim = C.dataset_getdim;
@@ -99,6 +119,14 @@ function Trainer:evaluate(dataset)
     cost = res[1],
     err = res[2],
   }
+end
+
+function Trainer:predict(dataset, output)
+  output = output or torch.FloatTensor()
+  local n = dataset:size()
+  output:resize(n)
+  C.trainer_predict(self, dataset, output:data())
+  return output
 end
 
 function Trainer:weights()

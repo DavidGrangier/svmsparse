@@ -116,7 +116,6 @@ SvmSgd::trainOne(const SVector &x, double y, double eta)
 #endif
 }
 
-
 /// Perform a training epoch
 void
 SvmSgd::train(int imin, int imax, const xvec_t &xp, const yvec_t &yp, const char *prefix)

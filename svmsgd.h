@@ -51,5 +51,4 @@ private:
   double  t;
 };
 
-
 #endif
