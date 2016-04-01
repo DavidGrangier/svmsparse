@@ -61,3 +61,7 @@ for i = 1, n do
   trainset:relabel(i, newlabels[i])
 end
 ```
+
+## Documentation ##
+
+[svmsparse.Dataset](https://github.com/DavidGrangier/svmsparse/blob/master/dataset.md)
