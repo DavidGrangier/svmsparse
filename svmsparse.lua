@@ -27,6 +27,9 @@ void dataset_balance(Dataset *d, Dataset* src, double pratio);
 void dataset_oneclass(Dataset *d, Dataset* src, double label);
 void dataset_add(Dataset* d, int n, int* indices, float* values, double label);
 void dataset_relabel(Dataset* d, int index, double label);
+double dataset_getlabel(Dataset* d, int i);
+int dataset_getnonzero(Dataset* d, int i);
+void dataset_getexample(Dataset* d, int i, int* indices, float* values);
 int dataset_getdim(Dataset *d);
 int dataset_getpcount(Dataset *d);
 int dataset_getncount(Dataset *d);
@@ -51,6 +54,7 @@ local C = ffi.load(package.searchpath('libsvmsparse', package.cpath))
 --- ---
 local Dataset = {}
 
+-- new empty dataset
 function Dataset.new()
   local self = C.dataset_new()
   self = ffi.cast('Dataset&', self)
@@ -58,6 +62,7 @@ function Dataset.new()
   return self
 end
 
+-- add an example to the dataset
 function Dataset:add(indices, values, label)
   local n = indices:size(1)
   local i, v = indices:data(), values:data()
@@ -69,16 +74,34 @@ function Dataset:relabel(index, label)
   C.dataset_relabel(self, index - 1, label)
 end
 
+-- create a new dataset with pratio positive rate, upsampling positives
 function Dataset:balance(pratio)
   local res = Dataset.new()
   C.dataset_balance(res, self, pratio)
   return res
 end
 
+-- create a new dataset with only positive, negative examples
 function Dataset:oneclass(label)
   local res = Dataset.new()
   C.dataset_oneclass(res, self, label)
   return res
+end
+
+-- get an example
+function Dataset:getExample(i, indices, values)
+  i = i - 1
+  indices = indices or torch.IntTensor()
+  values = values or torch.FloatTensor()
+
+  local n = C.dataset_getnonzero(self, i)
+  indices:resize(n)
+  values:resize(n)
+
+  C.dataset_getexample(self, i, indices:data(), values:data())
+  local label = C.dataset_getlabel(self, i)
+
+  return indices, values, label
 end
 
 -- query dataset # of examples, # of positives, # of negatives
@@ -88,7 +111,10 @@ function Dataset:size()
   return pcount + ncount, pcount, ncount
 end
 
+-- write dataset to a file
 Dataset.save = C.dataset_save
+
+-- load dataset from a file
 Dataset.load = C.dataset_load
 
 -- return data dimension = largest indices

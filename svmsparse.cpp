@@ -40,6 +40,10 @@ class Dataset {
     void add(Dataset d, double pratio);
     void addclass(Dataset d, double y);
     void relabel(int i, double y);
+
+    double getLabel(int i);
+    SVector getExample(int i);
+
     int getDim();
     int getPCount();
     int getNCount();
@@ -117,6 +121,22 @@ Dataset::relabel(int i, double y)
     pcount++;
   else
     ncount++;
+}
+
+SVector
+Dataset::getExample(int i)
+{
+  if (i < 0 || i >= (int)xp.size())
+    assertfail("getExample: index out of range");
+  return xp.at(i);
+}
+
+double
+Dataset::getLabel(int i)
+{
+  if (i < 0 || i >= (int)yp.size())
+    assertfail("getLabel: index out of range");
+  return yp.at(i);
 }
 
 int
@@ -199,6 +219,26 @@ void
 dataset_relabel(Dataset* d, int index, double label)
 {
   d->relabel(index, label);
+}
+
+double
+dataset_getlabel(Dataset* d, int i)
+{
+  return d->getLabel(i);
+}
+
+int
+dataset_getnonzero(Dataset* d, int i) {
+  return d->getExample(i).npairs();
+}
+
+void
+dataset_getexample(Dataset* d, int i, int* indices, float* values) {
+  SVector x = d->getExample(i);
+  for(const SVector::Pair *p = x; p->i>=0; p++) {
+    *indices++ = p->i + 1;
+    *values++ = p->v;
+  }
 }
 
 int
