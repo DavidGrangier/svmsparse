@@ -64,4 +64,5 @@ end
 
 ## Documentation ##
 
-[svmsparse.Dataset](https://github.com/DavidGrangier/svmsparse/blob/master/dataset.md)
+[svmsparse.Dataset](https://github.com/DavidGrangier/svmsparse/blob/master/docs/dataset.md)
+[svmsparse.Trainer](https://github.com/DavidGrangier/svmsparse/blob/master/docs/trainer.md)
