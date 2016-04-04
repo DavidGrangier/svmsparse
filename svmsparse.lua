@@ -64,7 +64,7 @@ end
 
 -- add an example to the dataset
 function Dataset:add(indices, values, label)
-  local n = indices:size(1)
+  local n = indices:nElement() > 0 and indices:size(1) or 0
   local i, v = indices:data(), values:data()
   C.dataset_add(self, n, i, v, label)
 end
@@ -99,9 +99,8 @@ function Dataset:getExample(i, indices, values)
   values:resize(n)
 
   C.dataset_getexample(self, i, indices:data(), values:data())
-  local label = C.dataset_getlabel(self, i)
 
-  return indices, values, label
+  return indices, values
 end
 
 -- query dataset # of examples, # of positives, # of negatives
