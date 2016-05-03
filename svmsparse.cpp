@@ -18,6 +18,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <cstdlib>
 #include "svmsgd.h"
 #include "assert.h"
 
@@ -38,7 +39,8 @@ class Dataset {
     Dataset();
     void add(SVector x, double y);
     void add(Dataset d, double pratio);
-    void addclass(Dataset d, double y);
+    void addClass(Dataset d, double y);
+    void addDelNoise(Dataset d, double noise);
     void relabel(int i, double y);
 
     double getLabel(int i);
@@ -98,7 +100,25 @@ Dataset::add(Dataset d, double pratio)
 }
 
 void
-Dataset::addclass(Dataset d, double y)
+Dataset::addDelNoise(Dataset d, double noise)
+{
+  double threshold = ((double)RAND_MAX) * noise;
+  int n = d.xp.size();
+  for (int i = 0; i < n; i++) {
+    SVector x = d.xp.at(i);
+    SVector z;
+    for(const SVector::Pair *p = x; p->i>=0; p++) {
+      if (rand() > threshold) { // randomly drop <noise> fraction of data
+        z.set(p->i, p->v);
+      }
+    }
+    z.trim();
+    add(z, d.yp.at(i));
+  }
+}
+
+void
+Dataset::addClass(Dataset d, double y)
 {
   int n = d.xp.size();
   for (int i=0; i<n; i++) {
@@ -199,8 +219,13 @@ dataset_balance(Dataset *d, Dataset* src, double pratio) {
 }
 
 void
+dataset_deletion(Dataset* d, Dataset* src, double noise) {
+  d->addDelNoise(*src, noise);
+}
+
+void
 dataset_oneclass(Dataset *d, Dataset* src, double label) {
-  d->addclass(*src, label);
+  d->addClass(*src, label);
 }
 
 void

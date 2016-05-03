@@ -25,6 +25,7 @@ typedef struct Dataset_ Dataset;
 Dataset* dataset_new();
 void dataset_balance(Dataset *d, Dataset* src, double pratio);
 void dataset_oneclass(Dataset *d, Dataset* src, double label);
+void dataset_deletion(Dataset* d, Dataset* src, double noise);
 void dataset_add(Dataset* d, int n, int* indices, float* values, double label);
 void dataset_relabel(Dataset* d, int index, double label);
 double dataset_getlabel(Dataset* d, int i);
@@ -85,6 +86,14 @@ end
 function Dataset:oneclass(label)
   local res = Dataset.new()
   C.dataset_oneclass(res, self, label)
+  return res
+end
+
+-- create a new dataset with introducing deletion (masking) noise
+function Dataset:deletion(noiserate)
+  if noiserate == 0 then return res end
+  local res = Dataset.new()
+  C.dataset_deletion(res, self, noiserate)
   return res
 end
 
