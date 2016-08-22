@@ -7,7 +7,7 @@ local svm = function(w, x)
   local s = w[w:size(1)]
   local idx, val = unpack(x)
   for i = 1, idx:size(1) do
-    s = w[ idx[i] ] * val[i]
+    s = s + w[ idx[i] ] * val[i]
   end
   return s
 end
@@ -20,7 +20,7 @@ local data = {
 local dataset = svmsparse.Dataset()
 for _, x in ipairs(data) do
   local indices, value, label = unpack(x)
-  dataset:add(indices, value, label) 
+  dataset:add(indices, value, label)
 end
 assert(dataset:dim() == 9)
 
@@ -38,7 +38,7 @@ for i = 1, nepoch do
   print(string.format('loss = %.3f cost = %.3f err = %.3f', eval.loss, eval.cost, eval.err))
 end
 
--- test 
+-- test
 local w = trainer:weights()
 assert(w:size(1) - 1 == dataset:dim())
 local m1 = svm(w, data[1]) * data[1][3]
